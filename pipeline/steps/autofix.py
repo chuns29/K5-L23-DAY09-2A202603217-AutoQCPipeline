@@ -27,13 +27,91 @@ Bẫy cần nghĩ tới (có test cho từng cái)
 
 Gợi ý: `yaml.safe_load / safe_dump`.
 """
-from collections import defaultdict  # noqa: F401
+from collections import defaultdict
 
-import yaml  # noqa: F401
+import yaml
 
-from ..common import ERROR, parse_yolo_line  # noqa: F401
+from ..common import ERROR, parse_yolo_line
 
 
 def fix(ds, issues, cfg):
-    # TODO
-    raise NotImplementedError("autofix chưa làm")
+    errors = [issue for issue in issues if issue.severity == ERROR]
+    fixes = []
+
+    def record(image, line, action, before, after):
+        fixes.append(dict(image=image, line=line, action=action, before=before, after=after))
+
+    # Xoá ảnh trước: mọi lỗi dòng của ảnh bị loại đều không cần xử lý nữa.
+    removed = {i.image for i in errors
+               if i.code.startswith("DUP_IMAGE_") or i.code in {"LEAK_TEST", "CORRUPT_IMAGE", "BAD_SIZE"}}
+    for stem in sorted(removed):
+        paths = [p for p in ds.image_files() if p.stem == stem]
+        label_path = ds.label_path(stem)
+        if label_path.exists():
+            paths.append(label_path)
+        if paths:
+            before = ", ".join(str(p.relative_to(ds.root)) for p in paths)
+            for path in paths:
+                path.unlink()
+            record(stem, "", "remove_image", before, "")
+
+    if any(i.code == "BAD_CLASS_NAME" for i in errors):
+        before = ds.yaml_path.read_text(encoding="utf-8") if ds.yaml_path.exists() else ""
+        data = yaml.safe_load(before) or {}
+        expected_names = dict(enumerate(cfg["classes"]))
+        if data.get("names") != expected_names:
+            data["names"] = expected_names
+            after = yaml.safe_dump(data, allow_unicode=True, sort_keys=False)
+            ds.yaml_path.write_text(after, encoding="utf-8")
+            record("data.yaml", "", "rename_classes", before, after)
+
+    missing = sorted({i.image for i in errors if i.code == "MISSING_LABEL_FILE"} - removed)
+    for stem in missing:
+        if not ds.label_path(stem).exists():
+            record(stem, "", "needs_label", "(không có file)", "chuyển người gán")
+
+    drop_codes = {"BAD_FORMAT", "BAD_CLASS_ID", "BOX_ZERO", "DUP_BOX"}
+    line_errors = defaultdict(lambda: defaultdict(set))
+    for issue in errors:
+        if (issue.image not in removed and issue.line is not None
+                and issue.code in drop_codes | {"BOX_OUT_OF_IMAGE"}):
+            line_errors[issue.image][issue.line].add(issue.code)
+
+    for stem, codes_by_line in sorted(line_errors.items()):
+        path = ds.label_path(stem)
+        if not path.exists():
+            continue
+        # Duyệt bản gốc một lần để xoá dòng không làm lệch số dòng kế tiếp.
+        original = path.read_text(encoding="utf-8").splitlines(keepends=True)
+        updated = []
+        changed = False
+        for no, raw_line in enumerate(original, 1):
+            codes = codes_by_line.get(no, set())
+            before = raw_line.rstrip("\r\n")
+            if codes & drop_codes:
+                record(stem, no, "drop_line", before, "")
+                changed = True
+                continue
+            if "BOX_OUT_OF_IMAGE" in codes:
+                try:
+                    c, x, y, w, h = parse_yolo_line(before)
+                except (ValueError, OverflowError):
+                    record(stem, no, "drop_line", before, "")
+                    changed = True
+                    continue
+                left, right = max(0.0, x - w / 2), min(1.0, x + w / 2)
+                top, bottom = max(0.0, y - h / 2), min(1.0, y + h / 2)
+                if right <= left or bottom <= top:
+                    record(stem, no, "drop_line", before, "")
+                    changed = True
+                    continue
+                if left != x - w / 2 or right != x + w / 2 or top != y - h / 2 or bottom != y + h / 2:
+                    clipped = ((left + right) / 2, (top + bottom) / 2, right - left, bottom - top)
+                    after = f"{c} " + " ".join(f"{v:.12g}" for v in clipped)
+                    record(stem, no, "clip_box", before, after)
+                    raw_line = after + ("\n" if raw_line.endswith("\n") else "")
+                    changed = True
+            updated.append(raw_line)
+        if changed:
+            path.write_text("".join(updated), encoding="utf-8")
+    return fixes
