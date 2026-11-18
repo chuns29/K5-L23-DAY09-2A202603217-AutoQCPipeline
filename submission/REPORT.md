@@ -69,7 +69,7 @@ mAP50 chính xác: raw **0.72575 ± 0.00021**, clean **0.70035 ± 0.03048**. Ch�
 
 Hai giả thuyết cần kiểm, chưa phải nguyên nhân đã chứng minh: (1) raw có 4 ảnh bị báo trùng kho test/val, có thể làm điểm raw cao giả; cần kiểm định lại trên tập đánh giá độc lập không rò rỉ, chưa đo được mức ảnh hưởng hiện tại. (2) clean vẫn Hold với 38/205 ảnh cảnh báo chưa duyệt, lại ít ảnh hơn; nhãn ngữ nghĩa hoặc phân bố car/truck/bus có thể gây giảm điểm. Cần audit các lớp này, đối chiếu số box, rồi làm thí nghiệm kiểm soát và thêm seed trong một vòng được phép; không chỉnh ngưỡng theo điểm test vừa đo.
 
-## 6. Quyết định và ghi chú AI
+## 6. Quyết định và ghi chú 
 Giữ **Hold**, không phát hành. Muốn Release cần không còn lỗi bắt buộc và ít hơn 10% ảnh còn cảnh báo chưa duyệt: với 205 ảnh, tối đa 20 ảnh, tức cần xử lý thêm ít nhất 18/38 ảnh hiện tại và chạy QC lại. Ngân sách 80 ảnh của lần chạy này đã dùng hết; cần vòng duyệt tiếp theo được cho phép, không tự tăng ngân sách hay sửa ngưỡng gate để đạt Release. Các điểm mù vẫn cần kiểm tra bổ sung.
 
 - **Prompt/chỉ dẫn cho AI:** yêu cầu trợ lý hoàn thiện lần lượt bốn module dựa trên docstring và test có sẵn; đầu vào YOLO/cache, quy tắc và đầu ra `Issue`/log theo đề; giữ nguyên test/dữ liệu/file mẫu, không sửa nhãn ngữ nghĩa tự động. Đây là tóm tắt ngữ cảnh trợ lý đã dùng, không phải một prompt nguyên văn do học viên soạn đủ bốn ý.
