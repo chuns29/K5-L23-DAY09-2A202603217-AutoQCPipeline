@@ -1,0 +1,20 @@
+{
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-u",
+    "-m",
+    "pipeline.run",
+    "--budget",
+    "0",
+    "--work",
+    "work/run_nb",
+    "--reports",
+    "submission/reports/gate_no_review",
+    "--export-dir",
+    "work/exp_nb"
+  ],
+  "exit_code": 20,
+  "decision": "Rework",
+  "n_errors": 6,
+  "export_exists": false
+}

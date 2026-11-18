@@ -1,0 +1,6 @@
+pytest: 79 passed in 159.42s (0:02:39)
+kết luận pipeline: Hold - Có 38/205 ảnh còn cảnh báo chưa được người duyệt (18.54%), đạt hoặc vượt ngưỡng Hold 10.00%.
+
+CẢNH BÁO: bỏ qua phần train (--no-train): phần train 15 điểm chấm riêng, làm sau khi có Colab
+
+0 lỗi, 1 cảnh báo

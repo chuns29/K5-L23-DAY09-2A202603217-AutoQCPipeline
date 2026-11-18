@@ -1,0 +1,14 @@
+[18:24:35] Bước 1/5  Nhận dữ liệu (ảnh hỏng, kích thước, trùng, rò rỉ test)
+[18:24:38]           nhận 205/224 ảnh, loại 19
+[18:24:38] Bước 4/5  QC tự động — vòng 1 (nhãn thô)
+[18:24:41]           36 lỗi bắt buộc, 153 cảnh báo
+[18:24:41] Bước 4/5  Sửa tự động lỗi bắt buộc (ảnh chưa có nhãn -> chuyển người gán)
+[18:24:41]           35 thay đổi -> 03_fixes.csv
+[18:24:41] Bước 4/5  QC tự động — vòng 2 (sau sửa tự động)
+[18:24:41]           6 lỗi bắt buộc còn lại; hàng đợi người duyệt: 125 ảnh
+[18:24:41] Bước 3/5  Người duyệt (MÔ PHỎNG) — ngân sách 0 ảnh
+[18:24:41] Bước 4/5  QC tự động — vòng 3 (sau người duyệt) + cửa chặn
+[18:24:42]           6 sửa tự động sau người duyệt -> 03b_fixes_after_review.csv
+[18:24:42]           kết luận: REWORK — Còn 6 lỗi bắt buộc; cần sửa trước khi xuất dữ liệu.
+[18:24:42] Bước 5/5  KHÔNG xuất: còn lỗi bắt buộc (Rework) — trả về bước 3
+[18:24:42] xong trong 6.4s
