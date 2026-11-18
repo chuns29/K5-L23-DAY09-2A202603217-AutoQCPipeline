@@ -1,0 +1,45 @@
+{
+  "platform": "Kaggle",
+  "input_commit": "a0d8e07fe7de55ed9d2336457a398a6d20cb6693",
+  "python": "3.13.16",
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "ultralytics": "8.4.214",
+  "gpu": "Tesla T4",
+  "datasets": {
+    "raw": {
+      "eligible_images": 213,
+      "scan_results": [
+        216,
+        6,
+        13,
+        11,
+        224
+      ],
+      "warnings": [
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0010.jpg: ignoring corrupt image/label: cannot identify image file '/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0010.jpg'",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0014.jpg: ignoring corrupt image/label: non-normalized or out of bounds coordinates []",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0020.jpg: ignoring corrupt image/label: Label class 93 exceeds dataset class count 4. Possible class labels are 0-3",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0022.jpg: ignoring corrupt image/label: non-normalized or out of bounds coordinates []",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0099.jpg: ignoring corrupt image/label: negative label values [-1.]",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0104.jpg: ignoring corrupt image/label: Label class 7 exceeds dataset class count 4. Possible class labels are 0-3",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0117.jpg: ignoring corrupt image/label: negative label values [-1.]",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0136.jpg: ignoring corrupt image/label: image file is truncated (26 bytes not processed)",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0179.jpg: ignoring corrupt image/label: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (2,) + inhomogeneous part.",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0194.jpg: ignoring corrupt image/label: Label class 4 exceeds dataset class count 4. Possible class labels are 0-3",
+        "\u001b[34m\u001b[1mtrain: \u001b[0m/kaggle/working/day09_autoqc_lab/work/train/raw/train/images/img_0199.jpg: ignoring corrupt image/label: Label class 4 exceeds dataset class count 4. Possible class labels are 0-3"
+      ]
+    },
+    "clean": {
+      "eligible_images": 205,
+      "scan_results": [
+        205,
+        0,
+        4,
+        0,
+        205
+      ],
+      "warnings": []
+    }
+  }
+}

@@ -52,8 +52,22 @@ Kết quả thực đo: **Rework, mã thoát 20**, còn 6 lỗi `MISSING_LABEL_F
 
 Hai điểm mù được đo trên calib: (1) box lỏng chỉ bắt **1/5**, bỏ sót **4/5** ở cấu hình đã chọn; (2) ảnh gần trùng chỉ bắt **4/6**, bỏ sót **2/6**. Ngoài ra, nhầm lớp còn bỏ sót **1/6**. Cần người xem các trường hợp khó; không coi im lặng của checker là bằng chứng nhãn đúng. Quy tắc cú pháp cũng không xác định được người mặc quân phục chưa có box trong `img_0001`, như quan sát trực quan ở bước chuẩn bị.
 
-## 5. Train: raw vs clean (tùy chọn, chấm riêng)
-**Chưa chạy train.** Đã chuẩn bị và push dữ liệu lên GitHub; Colab báo không có GPU khả dụng ở cả hai lần kết nối. Đã chuẩn bị notebook Kaggle thay thế với raw/clean, seed 0/1, 20 epoch; đã nhập notebook vào Kaggle, nhưng GPU và Internet còn bị khoá vì tài khoản chưa xác minh số điện thoại; đang chờ chủ tài khoản tự hoàn tất xác minh/CAPTCHA. Chưa có kết quả seed trong `submission/results/`, nên chưa có bằng chứng clean cải thiện mAP; hiện chỉ kiểm được phần lõi bằng `--no-train`.
+## 5. Train: raw vs clean
+
+Đã train trên [Kaggle Tesla T4](https://www.kaggle.com/code/chungdngquang/day09-autoqc-duong-quang-chung-raw-vs-clean), thay Colab do không được cấp GPU. Cả hai biến thể dùng `yolo26n.pt`, Ultralytics 8.4.214, **20 epoch, batch 16, imgsz 640, seed 0/1**, cùng gold_val 40 ảnh để chọn checkpoint và test 100 ảnh để đo cuối. Đầu vào cố định tại commit `a0d8e07`; JSON gốc do `scripts/train_compare.py` sinh, bảng dưới do `scripts/summarize_results.py` sinh.
+
+| biến thể | #ảnh train | số seed | map50 (TB ± độ lệch) | map50_95 (TB ± độ lệch) | precision (TB ± độ lệch) | recall (TB ± độ lệch) |
+|---|---|---|---|---|---|---|
+| raw | 224 | 2 | 0.726 ± 0.000 | 0.512 ± 0.004 | 0.764 ± 0.061 | 0.649 ± 0.028 |
+| clean | 205 | 2 | 0.700 ± 0.030 | 0.486 ± 0.013 | 0.715 ± 0.073 | 0.615 ± 0.017 |
+
+Chênh mAP50 (clean − raw) = **-0.025**.
+
+224 là số ảnh raw được dựng vào thư mục train, **không phải số thực sự được học**: Ultralytics loại 11 ảnh/nhãn lỗi, còn **213 ảnh**; clean dùng đủ **205 ảnh**, không có ảnh bị bỏ qua. Bằng chứng cache và môi trường trong [training_environment.json](results/training_environment.json).
+
+mAP50 chính xác: raw **0.72575 ± 0.00021**, clean **0.70035 ± 0.03048**. Chênh **−0.02540** nhỏ hơn độ lệch giữa seed của clean (0.03048); hai chênh theo seed là −0.0468 và −0.0040. Clean có trung bình thấp hơn ở thí nghiệm này; **chưa có bằng chứng clean tốt hơn raw**, và chỉ 2 seed/100 ảnh test chưa đủ kết luận tổng quát. AP50 trung bình tăng nhẹ ở car (+0.011), person (+0.005), giảm ở truck (−0.090), bus (−0.028).
+
+Hai giả thuyết cần kiểm, chưa phải nguyên nhân đã chứng minh: (1) raw có 4 ảnh bị báo trùng kho test/val, có thể làm điểm raw cao giả; cần kiểm định lại trên tập đánh giá độc lập không rò rỉ, chưa đo được mức ảnh hưởng hiện tại. (2) clean vẫn Hold với 38/205 ảnh cảnh báo chưa duyệt, lại ít ảnh hơn; nhãn ngữ nghĩa hoặc phân bố car/truck/bus có thể gây giảm điểm. Cần audit các lớp này, đối chiếu số box, rồi làm thí nghiệm kiểm soát và thêm seed trong một vòng được phép; không chỉnh ngưỡng theo điểm test vừa đo.
 
 ## 6. Quyết định và ghi chú AI
 Giữ **Hold**, không phát hành. Muốn Release cần không còn lỗi bắt buộc và ít hơn 10% ảnh còn cảnh báo chưa duyệt: với 205 ảnh, tối đa 20 ảnh, tức cần xử lý thêm ít nhất 18/38 ảnh hiện tại và chạy QC lại. Ngân sách 80 ảnh của lần chạy này đã dùng hết; cần vòng duyệt tiếp theo được cho phép, không tự tăng ngân sách hay sửa ngưỡng gate để đạt Release. Các điểm mù vẫn cần kiểm tra bổ sung.
@@ -62,4 +76,4 @@ Giữ **Hold**, không phát hành. Muốn Release cần không còn lỗi bắt
 - **Cách kiểm:** trợ lý chạy 79/79 test đạt, kiểm thêm dòng nhiều lỗi, dòng trống, nhiều dự đoán, tính lặp lại của sửa; chạy calib, pipeline và thí nghiệm budget=0; xem mẫu ảnh trùng. Học viên cần đọc và hiểu code trước khi nộp; không ghi nhận các kiểm tra này là do học viên tự thực hiện.
 - **Một lần AI sai:** ban đầu trợ lý dùng `python` của MSYS2 để tạo venv nhưng lại gọi đường dẫn Windows `.venv/Scripts/python.exe`, nên lệnh thất bại. Đã xác định sai interpreter và tạo lại venv bằng `py -3.13`, sau đó cài thư viện và chạy test thành công.
 
-Kiểm phần lõi trên Ubuntu/WSL bằng `python scripts/check_submission.py --no-train`: **79 test đạt, 0 lỗi, 1 cảnh báo do bỏ qua train, mã thoát 0** ([log](reports/check_core.txt)). Trên Windows, script đề so đường dẫn `pipeline\calibrate.py` với danh sách dùng `/`, nên báo nhầm file calibration được bảo vệ; giữ nguyên script và kiểm trên Linux. Chưa thực hiện phần thưởng CVAT.
+Phần lõi đã kiểm trên Ubuntu/WSL: **79 test đạt, 0 lỗi, 1 cảnh báo bỏ qua train** ([log](reports/check_core.txt)). Sau train, kiểm đầy đủ bằng `python scripts/check_submission.py`: **79 test đạt, 0 lỗi, 0 cảnh báo, mã thoát 0** ([log đầy đủ](reports/check_full.txt)). Trên Windows, script đề so đường dẫn `pipeline\calibrate.py` với danh sách dùng `/`, nên báo nhầm file calibration được bảo vệ; giữ nguyên script và kiểm trên Linux. Chưa thực hiện phần thưởng CVAT.

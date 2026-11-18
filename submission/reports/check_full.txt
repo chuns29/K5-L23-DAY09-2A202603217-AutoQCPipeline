@@ -1,0 +1,5 @@
+pytest: 79 passed in 151.09s (0:02:31)
+kết luận pipeline: Hold - Có 38/205 ảnh còn cảnh báo chưa được người duyệt (18.54%), đạt hoặc vượt ngưỡng Hold 10.00%.
+
+
+0 lỗi, 0 cảnh báo
